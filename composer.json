@@ -13,6 +13,6 @@
         }
     ],
     "require": {
-        "tereta/framework.pattern": "^0.0.5"
+        "tereta/framework.pattern": "^0.0.7"
     }
 }
