@@ -5,7 +5,20 @@ namespace Framework\View\Php\Abstract;
 use Exception;
 
 /**
- * Framework\View\Php\Abstract\Block
+ * ···························WWW.TERETA.DEV······························
+ * ·······································································
+ * : _____                        _                     _                :
+ * :|_   _|   ___   _ __    ___  | |_    __ _        __| |   ___  __   __:
+ * :  | |    / _ \ | '__|  / _ \ | __|  / _` |      / _` |  / _ \ \ \ / /:
+ * :  | |   |  __/ | |    |  __/ | |_  | (_| |  _  | (_| | |  __/  \ V / :
+ * :  |_|    \___| |_|     \___|  \__|  \__,_| (_)  \__,_|  \___|   \_/  :
+ * ·······································································
+ * ·······································································
+ *
+ * @class Framework\View\Php\Abstract\Block
+ * @package Framework\View\Php\Abstract
+ * @link https://tereta.dev
+ * @author Tereta Alexander <tereta.alexander@gmail.com>
  */
 abstract class Block
 {
