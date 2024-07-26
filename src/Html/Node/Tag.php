@@ -1,8 +1,6 @@
 <?php declare(strict_types=1);
 
-namespace Framework\View;
-
-use Framework\View\Html\Parser;
+namespace Framework\View\Html\Node;
 
 /**
  * ···························WWW.TERETA.DEV······························
@@ -15,54 +13,34 @@ use Framework\View\Html\Parser;
  * ·······································································
  * ·······································································
  *
- * @class Framework\View\Html
- * @package Framework\View
+ * @class Framework\View\Html\Node\Tag
+ * @package Framework\View\Html\Node
  * @link https://tereta.dev
  * @author Tereta Alexander <tereta.alexander@gmail.com>
  */
-class Html
+class Tag
 {
-    /**
-     * @var string
-     */
-    private string $document = '';
+    private string $name;
+    private int $positionStart;
+    private int $positionEnd;
+    private array $attributes;
 
-    private ?Parser $parser = null;
-
-    /**
-     * @param string $theme Theme path
-     */
-    public function __construct(private string $theme)
+    public function setName(string $name): static
     {
-    }
-
-    /**
-     * @param string $template
-     * @return $this
-     */
-    public function load(string $template): static
-    {
-        $this->document = file_get_contents($this->theme . '/' . $template . '.html');
-
-        $this->parser = new Parser($this->document);
-        $this->parser->decode();
-
+        $this->name = $name;
         return $this;
     }
 
-    /**
-     * @return string
-     */
-    public function render(): string
+    public function setAttributes(array $attributes): static
     {
-        return $this->document;
+        $this->attributes = $attributes;
+        return $this;
     }
 
-    /**
-     * @return string
-     */
-    public function __toString(): string
+    public function setPosition(int $start, int $end): static
     {
-        return $this->render();
+        $this->positionStart = $start;
+        $this->positionEnd = $end;
+        return $this;
     }
 }

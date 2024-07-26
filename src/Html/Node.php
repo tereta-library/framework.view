@@ -1,8 +1,6 @@
 <?php declare(strict_types=1);
 
-namespace Framework\View;
-
-use Framework\View\Html\Parser;
+namespace Framework\View\Html;
 
 /**
  * ···························WWW.TERETA.DEV······························
@@ -15,54 +13,18 @@ use Framework\View\Html\Parser;
  * ·······································································
  * ·······································································
  *
- * @class Framework\View\Html
+ * @class Framework\View\Html\Node
  * @package Framework\View
  * @link https://tereta.dev
  * @author Tereta Alexander <tereta.alexander@gmail.com>
  */
-class Html
+class Node
 {
-    /**
-     * @var string
-     */
-    private string $document = '';
-
-    private ?Parser $parser = null;
-
-    /**
-     * @param string $theme Theme path
-     */
-    public function __construct(private string $theme)
-    {
-    }
-
-    /**
-     * @param string $template
-     * @return $this
-     */
-    public function load(string $template): static
-    {
-        $this->document = file_get_contents($this->theme . '/' . $template . '.html');
-
-        $this->parser = new Parser($this->document);
-        $this->parser->decode();
-
-        return $this;
-    }
-
-    /**
-     * @return string
-     */
-    public function render(): string
-    {
-        return $this->document;
-    }
-
-    /**
-     * @return string
-     */
-    public function __toString(): string
-    {
-        return $this->render();
+    public function __construct(
+        private string $type,
+        private string $value,
+        private array $attributes = [],
+        private array $children = []
+    ) {
     }
 }
