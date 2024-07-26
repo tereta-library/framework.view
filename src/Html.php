@@ -3,7 +3,7 @@
 namespace Framework\View;
 
 use Framework\Dom\Document;
-use Exception
+use Exception;
 
 class Html
 {
