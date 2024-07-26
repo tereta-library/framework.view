@@ -2,33 +2,11 @@
 
 namespace Framework\View;
 
-use Framework\View\Html\Parser;
+use Framework\Dom\Document;
+use Exception
 
-/**
- * ···························WWW.TERETA.DEV······························
- * ·······································································
- * : _____                        _                     _                :
- * :|_   _|   ___   _ __    ___  | |_    __ _        __| |   ___  __   __:
- * :  | |    / _ \ | '__|  / _ \ | __|  / _` |      / _` |  / _ \ \ \ / /:
- * :  | |   |  __/ | |    |  __/ | |_  | (_| |  _  | (_| | |  __/  \ V / :
- * :  |_|    \___| |_|     \___|  \__|  \__,_| (_)  \__,_|  \___|   \_/  :
- * ·······································································
- * ·······································································
- *
- * @class Framework\View\Html
- * @package Framework\View
- * @link https://tereta.dev
- * @author Tereta Alexander <tereta.alexander@gmail.com>
- */
 class Html
 {
-    /**
-     * @var string
-     */
-    private string $document = '';
-
-    private ?Parser $parser = null;
-
     /**
      * @param string $theme Theme path
      */
@@ -38,31 +16,17 @@ class Html
 
     /**
      * @param string $template
-     * @return $this
-     */
-    public function load(string $template): static
-    {
-        $this->document = file_get_contents($this->theme . '/' . $template . '.html');
-
-        $this->parser = new Parser($this->document);
-        $this->parser->decode();
-
-        return $this;
-    }
-
-    /**
      * @return string
+     * @throws Exception
      */
-    public function render(): string
+    public function render(string $template): string
     {
-        return $this->document;
-    }
+        $document = file_get_contents($this->theme . '/' . $template . '.html');
+        $html = '';
+        foreach ((new Document($document))->getTree() as $item){
+            $html .= $item . "\n";
+        }
 
-    /**
-     * @return string
-     */
-    public function __toString(): string
-    {
-        return $this->render();
+        return $html;
     }
 }
