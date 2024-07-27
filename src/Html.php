@@ -23,7 +23,8 @@ class Html
     {
         $document = file_get_contents($this->theme . '/' . $template . '.html');
         $html = '';
-        foreach ((new Document($document))->getTree() as $item){
+        $domTree = (new Document($document))->getTree();
+        foreach ($domTree as $item){
             $html .= $item . "\n";
         }
 
