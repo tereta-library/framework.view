@@ -4,6 +4,7 @@ namespace Framework\View;
 
 use Framework\Dom\Document;
 use Exception;
+use Framework\Dom\Node;
 
 class Html
 {
@@ -21,13 +22,65 @@ class Html
      */
     public function render(string $template): string
     {
-        $document = file_get_contents($this->theme . '/' . $template . '.html');
-        $html = '';
-        $domTree = (new Document($document))->getTree();
-        foreach ($domTree as $item){
-            $html .= $item . "\n";
+        list($documentRoot, $documentList) = $this->load($template);
+
+        $html = $documentRoot->render() . "\n-------------------------\n";
+
+        foreach ($documentList as $item){
+            $html .= $item . "\n---------------------\n";
         }
 
         return $html;
+    }
+
+    public function load(string $template): array
+    {
+        $documentList = [];
+        $documentRoot = null;
+        $this->loadItem($template, $documentRoot, $documentList);
+        foreach ($documentList as $key => $document) {
+            $documentList[$key] = $document;
+        }
+
+        return [$documentRoot, $documentList];
+    }
+
+    private function loadItem(string $template, ?Document &$documentRoot, array &$documentList): array
+    {
+        $documentFile = $this->theme . '/' . $template . '.html';
+        $document = file_get_contents($documentFile);
+        $document = (new Document($document, $documentFile));
+        $nodeTree = $document->getNodeTree();
+        $nodeList = $document->getNodeList();
+        $tagList = $document->fetchTags();
+
+        $isRootDocument = true;
+        foreach ($nodeList as $node) {
+            if ($this->update($node, $documentRoot, $documentList)) {
+                $isRootDocument = false;
+                break;
+            }
+        }
+
+        if ($isRootDocument){
+            $documentRoot = $document;
+        } else {
+            $documentList[] = $document;
+        }
+
+        return $documentList;
+    }
+
+    private function update(Node $node, ?Document &$documentRoot, array &$documentList = []): bool
+    {
+        if ($node->getName() !== 'meta' ||
+            $node->getAttribute('name') != 'backend-update' ||
+            !$node->getAttribute('content')) {
+            return false;
+        }
+
+        $this->loadItem($node->getAttribute('content'), $documentRoot, $documentList);
+
+        return true;
     }
 }
