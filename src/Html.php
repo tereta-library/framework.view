@@ -5,7 +5,24 @@ namespace Framework\View;
 use Framework\Dom\Document;
 use Exception;
 use Framework\Dom\Node;
+use Framework\View\Html\Update;
 
+/**
+ * ···························WWW.TERETA.DEV······························
+ * ·······································································
+ * : _____                        _                     _                :
+ * :|_   _|   ___   _ __    ___  | |_    __ _        __| |   ___  __   __:
+ * :  | |    / _ \ | '__|  / _ \ | __|  / _` |      / _` |  / _ \ \ \ / /:
+ * :  | |   |  __/ | |    |  __/ | |_  | (_| |  _  | (_| | |  __/  \ V / :
+ * :  |_|    \___| |_|     \___|  \__|  \__,_| (_)  \__,_|  \___|   \_/  :
+ * ·······································································
+ * ·······································································
+ *
+ * @class Framework\View\Html
+ * @package Framework\View
+ * @link https://tereta.dev
+ * @author Tereta Alexander <tereta.alexander@gmail.com>
+ */
 class Html
 {
     /**
@@ -24,13 +41,12 @@ class Html
     {
         list($documentRoot, $documentList) = $this->load($template);
 
-        $html = $documentRoot->render() . "\n-------------------------\n";
-
-        foreach ($documentList as $item){
-            $html .= $item . "\n---------------------\n";
+        $update = new Update($documentRoot);
+        foreach ($documentList as $item) {
+            $update->update($item);
         }
 
-        return $html;
+        return "<!DOCTYPE html>\n" . $documentRoot->render();
     }
 
     public function load(string $template): array
@@ -50,15 +66,14 @@ class Html
         $documentFile = $this->theme . '/' . $template . '.html';
         $document = file_get_contents($documentFile);
         $document = (new Document($document, $documentFile));
-        $nodeTree = $document->getNodeTree();
         $nodeList = $document->getNodeList();
-        $tagList = $document->fetchTags();
 
         $isRootDocument = true;
         foreach ($nodeList as $node) {
-            if ($this->update($node, $documentRoot, $documentList)) {
+            $this->update($node, $documentRoot, $documentList);
+
+            if (!$this->isRootDocument($node)) {
                 $isRootDocument = false;
-                break;
             }
         }
 
@@ -69,6 +84,17 @@ class Html
         }
 
         return $documentList;
+    }
+
+    private function isRootDocument(Node $node): bool
+    {
+        if ($node->getName() !== 'meta' ||
+            $node->getAttribute('name') !== 'backend-update' ||
+            !$node->getAttribute('content')) {
+            return true;
+        }
+
+        return false;
     }
 
     private function update(Node $node, ?Document &$documentRoot, array &$documentList = []): bool
