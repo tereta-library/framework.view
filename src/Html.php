@@ -6,6 +6,7 @@ use Framework\Dom\Document;
 use Exception;
 use Framework\Dom\Node;
 use Framework\View\Html\Update;
+use Framework\View\Html\Block as HtmlBlock;
 
 /**
  * ···························WWW.TERETA.DEV······························
@@ -25,6 +26,8 @@ use Framework\View\Html\Update;
  */
 class Html
 {
+    private array $loadedUpdates = [];
+
     /**
      * @param string $theme Theme path
      */
@@ -46,6 +49,8 @@ class Html
             $update->update($item);
         }
 
+        (new HtmlBlock($documentRoot))->process();
+
         return "<!DOCTYPE html>\n" . $documentRoot->render();
     }
 
@@ -64,16 +69,20 @@ class Html
     private function loadItem(string $template, ?Document &$documentRoot, array &$documentList): array
     {
         $documentFile = $this->theme . '/' . $template . '.html';
+        if (!is_file($documentFile)) throw new Exception('Template file not found: ' . $documentFile);
+        if (in_array($template, $this->loadedUpdates)) return throw new Exception('Update file already loaded: ' . $documentFile);
+        $this->loadedUpdates[] = $template;
+
         $document = file_get_contents($documentFile);
         $document = (new Document($document, $documentFile));
         $nodeList = $document->getNodeList();
 
-        $isRootDocument = true;
+        $isRootDocument = false;
         foreach ($nodeList as $node) {
             $this->update($node, $documentRoot, $documentList);
 
-            if (!$this->isRootDocument($node)) {
-                $isRootDocument = false;
+            if ($this->isRootDocument($node)) {
+                $isRootDocument = true;
             }
         }
 
@@ -89,8 +98,13 @@ class Html
     private function isRootDocument(Node $node): bool
     {
         if ($node->getName() !== 'meta' ||
-            $node->getAttribute('name') !== 'backend-update' ||
+            $node->getAttribute('name') !== 'backend-layout' ||
             !$node->getAttribute('content')) {
+            return false;
+        }
+
+        $backendLayout = $node->getAttribute('content');
+        if ($backendLayout === 'root') {
             return true;
         }
 

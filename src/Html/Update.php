@@ -4,7 +4,7 @@ namespace Framework\View\Html;
 
 use Framework\Dom\Document;
 use Framework\Dom\Node;
-use Framework\View\Html\Select;
+use Exception;
 
 /**
  * ···························WWW.TERETA.DEV······························
@@ -37,12 +37,34 @@ class Update
         $this->selector = new Selector($this->rootDocument);
     }
 
+    /**
+     * @param Document $updateDocument
+     * @return void
+     * @throws Exception
+     */
     public function update(Document $updateDocument) {
         foreach($updateDocument->getNodeList() as $node) {
             $this->moveContent($node);
+            $this->replaceNode($node);
         }
     }
 
+    /**
+     * @param Node $item
+     * @return void
+     */
+    public function replaceNode(Node $item): void {
+        $selector = $item->getAttribute('data-backend-replace');
+        if (!$selector) return;
+
+        $rootElement = $this->selector->getBySelector($selector);
+        $rootElement->getParent()->replaceChild($rootElement, $item);
+    }
+
+    /**
+     * @param Node $item
+     * @return void
+     */
     private function moveContent(Node $item): void {
         $selector = $item->getAttribute('data-backend-content');
         if (!$selector) return;
