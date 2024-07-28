@@ -5,8 +5,9 @@ namespace Framework\View;
 use Framework\Dom\Document;
 use Exception;
 use Framework\Dom\Node;
-use Framework\View\Html\Update;
+use Framework\View\Html\Update as HtmlUpdate;
 use Framework\View\Html\Block as HtmlBlock;
+use Framework\View\Html\Php as HtmlPhp;
 
 /**
  * ···························WWW.TERETA.DEV······························
@@ -44,12 +45,13 @@ class Html
     {
         list($documentRoot, $documentList) = $this->load($template);
 
-        $update = new Update($documentRoot);
+        $update = new HtmlUpdate($documentRoot);
         foreach ($documentList as $item) {
             $update->update($item);
         }
 
         (new HtmlBlock($documentRoot))->process();
+        (new HtmlPhp($documentRoot))->process();
 
         return "<!DOCTYPE html>\n" . $documentRoot->render();
     }
