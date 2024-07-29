@@ -1,6 +1,6 @@
 <?php declare(strict_types=1);
 
-namespace Framework\View\Html\Block;
+namespace Framework\View\Html\Php;
 
 use Framework\Dom\Node as DomNode;
 
@@ -15,8 +15,8 @@ use Framework\Dom\Node as DomNode;
  * ·······································································
  * ·······································································
  *
- * @class Framework\View\Html\Block\Node
- * @package Framework\View\Html\Block
+ * @class Framework\View\Html\Php\Node
+ * @package Framework\View\Html\Php
  * @link https://tereta.dev
  * @author Tereta Alexander <tereta.alexander@gmail.com>
  */
@@ -24,6 +24,19 @@ class Node extends DomNode
 {
     public function render(): string
     {
+        $tag = $this->getTag();
+        $content = $tag->getContent();
+        if (substr($content, 0, 2) != ': ') {
+            return parent::render();
+        }
+
+        $content = substr($content, 2);
+
+        if (preg_match('/^render \$([\w]+)/', $content, $matches)) {
+            $variable = $matches[1];
+            return "<?php echo \${$variable} ?>";
+        }
+
         return parent::render();
     }
 }

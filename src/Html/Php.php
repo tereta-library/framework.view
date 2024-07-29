@@ -3,6 +3,8 @@
 namespace Framework\View\Html;
 
 use Framework\Dom\Document;
+use Framework\Dom\Node;
+use Framework\View\Html\Php\Node as PhpNode;
 
 class Php
 {
@@ -18,6 +20,20 @@ class Php
 
     private function processPhp($node)
     {
+        if ($node->getType() != Node::TYPE_COMMENT) {
+            return;
+        }
+
+        $tag = $node->getTag();
+        $content = $tag->getContent();
+
+        if (substr($content, 0, 2) != ': ') {
+            return;
+        }
+
+        $phpNode = (new PhpNode($this->document))->import($node->export());
+        $node->getParent()->replaceChild($node, $phpNode);
+
         $e=0;
     }
 }

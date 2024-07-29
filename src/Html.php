@@ -50,6 +50,7 @@ class Html
             $update->update($item);
         }
 
+        $documentRoot->getNodeList(true);
         (new HtmlBlock($documentRoot))->process();
         (new HtmlPhp($documentRoot))->process();
 
