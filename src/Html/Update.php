@@ -72,6 +72,7 @@ class Update
         $rootElement = $this->selector->getBySelector($selector);
         $rootElement->clearChildren();
         foreach ($item->getChildren() as $child) {
+            $child->setParent($rootElement);
             $rootElement->addChildren($child);
         }
     }
