@@ -22,6 +22,9 @@ use Framework\Dom\Node as DomNode;
  */
 class Node extends DomNode
 {
+    /**
+     * @return string
+     */
     public function render(): string
     {
         $tag = $this->getTag();
@@ -48,6 +51,13 @@ class Node extends DomNode
             return $this->renderForeach($variable, $as);
         }
 
+        if (preg_match('/^foreach\s+\$([a-z0-9_\-\[\]\'"]+)\s+as\s+\$([a-z0-9_\-\[\]\'"]+)\s*=\>\s*\$([a-z0-9_\-\[\]\'"]+)\s*$/U', $content, $matches)) {
+            $variable = $matches[1];
+            $key = $matches[2];
+            $as = $matches[3];
+            return $this->renderForeach($variable, $as, $key);
+        }
+
         if (preg_match('/^\s*endif\s*$/U', $content, $matches)) {
             return "<?php endif ?>";
         }
@@ -59,13 +69,30 @@ class Node extends DomNode
         return parent::render();
     }
 
-    private function renderForeach(string $variable, string $as): string
+    /**
+     * @param string $variable
+     * @param string $as
+     * @param string|null $key
+     * @return string
+     */
+    private function renderForeach(string $variable, string $as, ?string $key = null): string
     {
+        if ($key) {
+            return "<?php foreach $" . $variable . " as $" . $key . " => $" . $as . " : ?>";
+        }
+
         return "<?php foreach $" . $variable . " as $" . $as . " : ?>";
     }
 
+    /**
+     * @param string $condition
+     * @return string
+     */
     private function renderIf(string $condition): string
     {
-        return "<?php if ({$condition} !!!!!!!!): ?>";
+        if (!preg_match('/^[0-9a-zA-Z\s\$\-\>]+$/Usi', $condition, $matches)) {
+            return parent::render();
+        }
+        return "<?php if ({$condition}): ?>";
     }
 }
