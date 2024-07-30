@@ -32,11 +32,21 @@ class Node extends DomNode
 
         $content = substr($content, 2);
 
-        if (preg_match('/^render \$([\w]+)/', $content, $matches)) {
+        if (preg_match('/^render\s\$([\w]+)/', $content, $matches)) {
+            $variable = $matches[1];
+            return "<?php echo \${$variable} ?>";
+        }
+
+        if (preg_match('/^if\s+([\s\=a-z0-9\"\'\$]+)/', $content, $matches)) {
             $variable = $matches[1];
             return "<?php echo \${$variable} ?>";
         }
 
         return parent::render();
+    }
+
+    private function renderIf(string $content): string
+    {
+        return "<?php if \${$content} ?>";
     }
 }
