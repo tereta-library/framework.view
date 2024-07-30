@@ -22,4 +22,12 @@ use Framework\Dom\Node as DomNode;
  */
 class Node extends DomNode
 {
+    public function renderContent(): string
+    {
+        $return = '';
+        foreach ($this->getChildren() as $child) {
+            $return .= $child->render();
+        }
+        return $return;
+    }
 }

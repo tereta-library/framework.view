@@ -8,6 +8,7 @@ use Framework\Dom\Node;
 use Framework\View\Html\Update as HtmlUpdate;
 use Framework\View\Html\Block as HtmlBlock;
 use Framework\View\Html\Php as HtmlPhp;
+use Framework\View\Html\Separator as HtmlSeparator;
 
 /**
  * ···························WWW.TERETA.DEV······························
@@ -52,6 +53,7 @@ class Html
 
         (new HtmlBlock($documentRoot))->process();
         (new HtmlPhp($documentRoot))->process();
+        (new HtmlSeparator($documentRoot))->process();
 
         return "<!DOCTYPE html>\n" . $documentRoot->render();
     }
