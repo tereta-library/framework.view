@@ -32,21 +32,40 @@ class Node extends DomNode
 
         $content = substr($content, 2);
 
-        if (preg_match('/^render\s\$([\w]+)/', $content, $matches)) {
+        if (preg_match('/^render\s+\$([a-z0-9_\-\[\]\'\"]+)\s*$/', $content, $matches)) {
             $variable = $matches[1];
             return "<?php echo \${$variable} ?>";
         }
 
-        if (preg_match('/^if\s+([\s\=a-z0-9\"\'\$]+)/', $content, $matches)) {
+        if (preg_match('/^if\s+(.+)\s*$/U', $content, $matches)) {
             $variable = $matches[1];
-            return "<?php echo \${$variable} ?>";
+            return $this->renderIf($variable);
+        }
+
+        if (preg_match('/^foreach\s+\$([a-z0-9_\-\[\]\'\"]+)\s+as\s+\$([a-z0-9_\-\[\]\'\"]+)\s*$/U', $content, $matches)) {
+            $variable = $matches[1];
+            $as = $matches[2];
+            return $this->renderForeach($variable, $as);
+        }
+
+        if (preg_match('/^\s*endif\s*$/U', $content, $matches)) {
+            return "<?php endif ?>";
+        }
+
+        if (preg_match('/^\s*endforeach\s*$/U', $content, $matches)) {
+            return "<?php endforeach ?>";
         }
 
         return parent::render();
     }
 
-    private function renderIf(string $content): string
+    private function renderForeach(string $variable, string $as): string
     {
-        return "<?php if \${$content} ?>";
+        return "<?php foreach $" . $variable . " as $" . $as . " : ?>";
+    }
+
+    private function renderIf(string $condition): string
+    {
+        return "<?php if ({$condition} !!!!!!!!): ?>";
     }
 }

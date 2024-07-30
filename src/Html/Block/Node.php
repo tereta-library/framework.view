@@ -22,8 +22,4 @@ use Framework\Dom\Node as DomNode;
  */
 class Node extends DomNode
 {
-    public function render(): string
-    {
-        return parent::render();
-    }
 }

@@ -33,7 +33,5 @@ class Php
 
         $phpNode = (new PhpNode($this->document))->import($node->export());
         $node->getParent()->replaceChild($node, $phpNode);
-
-        $e=0;
     }
 }
