@@ -43,8 +43,8 @@ class Block
             $blockClass = "\\{$blockClass}";
         }
 
-        $block = new $blockClass($this->document);
-        if (!$block instanceof BlockNode) throw new Exception('Block must be instance of ' . BlockNode::class);
+        $block = new BlockNode($this->document);
+        $block->setClass($blockClass);
         $block->import($node->export());
         $node->getParent()->replaceChild($node, $block);
     }

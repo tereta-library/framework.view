@@ -35,34 +35,34 @@ class Node extends DomNode
 
         $content = substr($content, 2);
 
-        if (preg_match('/^render\s+\$([a-z0-9_\-\[\]\'\"]+)\s*$/', $content, $matches)) {
+        if (preg_match('/^render\s+\$([a-z0-9_\-\[\]\'\"]+)\s*$/Ui', $content, $matches)) {
             $variable = $matches[1];
             return "<?php echo \${$variable} ?>";
         }
 
-        if (preg_match('/^if\s+(.+)\s*$/U', $content, $matches)) {
+        if (preg_match('/^if\s+(.+)\s*$/Ui', $content, $matches)) {
             $variable = $matches[1];
             return $this->renderIf($variable);
         }
 
-        if (preg_match('/^foreach\s+\$([a-z0-9_\-\[\]\'\"]+)\s+as\s+\$([a-z0-9_\-\[\]\'\"]+)\s*$/U', $content, $matches)) {
+        if (preg_match('/^foreach\s+\$([a-z0-9_\-\[\]\'\"]+)\s+as\s+\$([a-z0-9_\-\[\]\'\"]+)\s*$/Ui', $content, $matches)) {
             $variable = $matches[1];
             $as = $matches[2];
             return $this->renderForeach($variable, $as);
         }
 
-        if (preg_match('/^foreach\s+\$([a-z0-9_\-\[\]\'"]+)\s+as\s+\$([a-z0-9_\-\[\]\'"]+)\s*=\>\s*\$([a-z0-9_\-\[\]\'"]+)\s*$/U', $content, $matches)) {
+        if (preg_match('/^foreach\s+\$([a-z0-9_\-\[\]\'"]+)\s+as\s+\$([a-z0-9_\-\[\]\'"]+)\s*=\>\s*\$([a-z0-9_\-\[\]\'"]+)\s*$/Ui', $content, $matches)) {
             $variable = $matches[1];
             $key = $matches[2];
             $as = $matches[3];
             return $this->renderForeach($variable, $as, $key);
         }
 
-        if (preg_match('/^\s*endif\s*$/U', $content, $matches)) {
+        if (preg_match('/^\s*endif\s*$/Ui', $content, $matches)) {
             return "<?php endif ?>";
         }
 
-        if (preg_match('/^\s*endforeach\s*$/U', $content, $matches)) {
+        if (preg_match('/^\s*endforeach\s*$/Ui', $content, $matches)) {
             return "<?php endforeach ?>";
         }
 
@@ -78,10 +78,10 @@ class Node extends DomNode
     private function renderForeach(string $variable, string $as, ?string $key = null): string
     {
         if ($key) {
-            return "<?php foreach $" . $variable . " as $" . $key . " => $" . $as . " : ?>";
+            return "<?php foreach ($" . $variable . " as $" . $key . " => $" . $as . ") : ?>";
         }
 
-        return "<?php foreach $" . $variable . " as $" . $as . " : ?>";
+        return "<?php foreach ($" . $variable . " as $" . $as . ") : ?>";
     }
 
     /**

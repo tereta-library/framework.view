@@ -9,6 +9,7 @@ use Framework\View\Html\Update as HtmlUpdate;
 use Framework\View\Html\Block as HtmlBlock;
 use Framework\View\Html\Php as HtmlPhp;
 use Framework\View\Html\Separator as HtmlSeparator;
+use Framework\View\Php\Template;
 
 /**
  * ···························WWW.TERETA.DEV······························
@@ -33,18 +34,18 @@ class Html
     /**
      * @param string $theme Theme path
      */
-    public function __construct(private string $theme)
+    public function __construct(private string $themeDirectory, private string $generatedDirectory)
     {
     }
 
     /**
-     * @param string $template
+     * @param string $layout
      * @return string
      * @throws Exception
      */
-    public function render(string $template): string
+    public function render(string $layout): string
     {
-        list($documentRoot, $documentList) = $this->load($template);
+        list($documentRoot, $documentList) = $this->load($layout);
 
         $update = new HtmlUpdate($documentRoot);
         foreach ($documentList as $item) {
@@ -53,9 +54,19 @@ class Html
 
         (new HtmlBlock($documentRoot))->process();
         (new HtmlPhp($documentRoot))->process();
-        (new HtmlSeparator($documentRoot))->process();
+        (new HtmlSeparator($documentRoot, $this->generatedDirectory, $layout))->process();
 
-        return "<!DOCTYPE html>\n" . $documentRoot->render();
+        $file = $layout . '.php';
+        $fileFull = $this->generatedDirectory . '/' . $layout . '.php';
+        $fileFull = str_replace('\\', '/', $fileFull);
+        $dir = dirname($fileFull);
+        if (!is_dir($dir)) {
+            mkdir($dir, 0777, true);
+        }
+        $content = "<!DOCTYPE html>\n" . $documentRoot->render();
+        file_put_contents($fileFull, $content);
+
+        return (string) (new Template($this->generatedDirectory))->setTemplate($file);
     }
 
     public function load(string $template): array
@@ -72,7 +83,7 @@ class Html
 
     private function loadItem(string $template, ?Document &$documentRoot, array &$documentList): array
     {
-        $documentFile = $this->theme . '/' . $template . '.html';
+        $documentFile = $this->themeDirectory . '/' . $template . '.html';
         if (!is_file($documentFile)) throw new Exception('Template file not found: ' . $documentFile);
         if (in_array($template, $this->loadedUpdates)) return throw new Exception('Update file already loaded: ' . $documentFile);
         $this->loadedUpdates[] = $template;

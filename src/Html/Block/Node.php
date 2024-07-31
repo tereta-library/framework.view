@@ -3,6 +3,7 @@
 namespace Framework\View\Html\Block;
 
 use Framework\Dom\Node as DomNode;
+use Framework\View\Php\Abstract\Block as AbstractBlock;
 
 /**
  * ···························WWW.TERETA.DEV······························
@@ -22,6 +23,9 @@ use Framework\Dom\Node as DomNode;
  */
 class Node extends DomNode
 {
+    private ?string $class = null;
+    private ?string $template = null;
+
     public function renderContent(): string
     {
         $return = '';
@@ -29,5 +33,28 @@ class Node extends DomNode
             $return .= $child->render();
         }
         return $return;
+    }
+
+    public function setClass(string $class): static
+    {
+        $this->class = $class;
+        return $this;
+    }
+
+    public function getClass(): ?string
+    {
+        return $this->class;
+    }
+
+    public function setTemplate(string $template): static
+    {
+        $this->template = $template;
+        return $this;
+    }
+
+    public function render(): string
+    {
+        $blockClass = str_replace('\\', '\\\\', $this->class);
+        return "<?php echo $" . "this->create(\"{$blockClass}\", \"{$this->template}\")->render() ?>";
     }
 }

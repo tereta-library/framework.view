@@ -7,14 +7,13 @@ use Framework\View\Html\Block\Node as BlockNode;
 
 class Separator
 {
-    public function __construct(private Document &$document)
+    public function __construct(private Document &$document, private string $generatedDirectory, private string $layout)
     {
     }
 
     public function process() {
         $blockTemplates = [];
         $this->processSeparation($this->document->getNodeTree(), $blockTemplates);
-        $e=0;
         $blockTemplates;
     }
 
@@ -28,12 +27,16 @@ class Separator
                 continue;
             }
 
-            $blockTemplates[] = [
-                'class' => strtolower(get_class($node)),
-                'html'  => $node->renderContent(),
-                'node'  => $node
-            ];
-
+            $file = $this->layout . '/' . ltrim(strtolower($node->getClass()), '\/') . '.php';
+            $file = str_replace('\\', '/', $file);
+            $fileFull = $this->generatedDirectory . '/' . $file;
+            $dir = dirname($fileFull);
+            if (!is_dir($dir)) {
+                mkdir($dir, 0777, true);
+            }
+            $content = $node->renderContent();
+            file_put_contents($fileFull, $content);
+            $node->setTemplate($file);
             $node->clearChildren();
         }
     }

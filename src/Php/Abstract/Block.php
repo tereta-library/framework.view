@@ -39,9 +39,22 @@ abstract class Block
         }
     }
 
+    public function create(string $block, string $template = null) : self
+    {
+        return (new $block($this->themeDirectory))->setTemplate($template);
+    }
+
     public function setTemplate(string $template): static
     {
         $this->template = $template;
+
+        return $this;
+    }
+
+
+    public function assign(string $variable, mixed $value): static
+    {
+        $this->data[$variable] = $value;
 
         return $this;
     }
@@ -52,6 +65,8 @@ abstract class Block
      */
     public function render(): string
     {
+        extract($this->data);
+
         ob_start();
         extract($this->data);
         if (!is_file("{$this->themeDirectory}/{$this->template}")) {
