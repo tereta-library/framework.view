@@ -47,6 +47,10 @@ class Html
     {
         list($documentRoot, $documentList) = $this->load($layout);
 
+        if (!$documentRoot) {
+            throw new Exception('Root document is not defined');
+        }
+
         $update = new HtmlUpdate($documentRoot);
         foreach ($documentList as $item) {
             $update->update($item);

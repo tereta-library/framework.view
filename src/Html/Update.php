@@ -59,6 +59,8 @@ class Update
         if (!$selector) return;
 
         $rootElement = $this->selector->getBySelector($selector);
+        if (!$rootElement) return;
+
         $rootElement->getParent()->replaceChild($rootElement, $item);
     }
 
@@ -71,6 +73,8 @@ class Update
         if (!$selector) return;
 
         $rootElement = $this->selector->getBySelector($selector);
+        if (!$rootElement) return;
+
         $rootElement->clearChildren();
         foreach ($item->getChildren() as $child) {
             $child->setParent($rootElement);
@@ -83,6 +87,8 @@ class Update
         if (!$selector) return;
 
         $rootElement = $this->selector->getBySelector($selector);
+        if (!$rootElement) return;
+
         $item->setParent($rootElement);
         $rootElement->addChildren($item);
         $item->setAttribute('data-backend-add', null);
