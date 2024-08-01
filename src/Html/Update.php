@@ -45,6 +45,7 @@ class Update
     public function update(Document $updateDocument) {
         foreach($updateDocument->getNodeList() as $node) {
             $this->moveContent($node);
+            $this->addContent($node);
             $this->replaceNode($node);
         }
     }
@@ -75,5 +76,15 @@ class Update
             $child->setParent($rootElement);
             $rootElement->addChildren($child);
         }
+    }
+
+    private function addContent(Node $item): void {
+        $selector = $item->getAttribute('data-backend-add');
+        if (!$selector) return;
+
+        $rootElement = $this->selector->getBySelector($selector);
+        $item->setParent($rootElement);
+        $rootElement->addChildren($item);
+        $item->setAttribute('data-backend-add', null);
     }
 }

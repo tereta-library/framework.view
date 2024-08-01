@@ -120,6 +120,7 @@ class Html
 
         $backendLayout = $node->getAttribute('content');
         if ($backendLayout === 'root') {
+            $node->remove();
             return true;
         }
 
@@ -135,6 +136,7 @@ class Html
         }
 
         $this->loadItem($node->getAttribute('content'), $documentRoot, $documentList);
+        $node->remove();
 
         return true;
     }
