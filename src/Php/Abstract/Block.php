@@ -40,6 +40,12 @@ abstract class Block
         if ($template !== null) {
             $this->template = $template;
         }
+
+        $this->construct();
+    }
+
+    protected function construct(): void
+    {
     }
 
     /**
@@ -58,7 +64,7 @@ abstract class Block
      * @param mixed $value
      * @return $this
      */
-    public function assign(string $variable, mixed $value): static
+    public function assign(string $variable, mixed $value = null): static
     {
         $this->data[$variable] = $value;
 
