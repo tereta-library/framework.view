@@ -10,6 +10,7 @@ use Framework\View\Html\Block as HtmlBlock;
 use Framework\View\Html\Php as HtmlPhp;
 use Framework\View\Html\Separator as HtmlSeparator;
 use Framework\View\Php\Template;
+use Framework\View\Html\Block\Node as BlockNode;
 
 /**
  * ···························WWW.TERETA.DEV······························
@@ -29,6 +30,7 @@ use Framework\View\Php\Template;
  */
 class Html
 {
+    private ?Document $documentRoot = null;
     private array $loadedUpdates = [];
 
     /**
@@ -40,10 +42,10 @@ class Html
 
     /**
      * @param string $layout
-     * @return string
+     * @return $this
      * @throws Exception
      */
-    public function render(string $layout): string
+    public function initialize(string $layout): static
     {
         list($documentRoot, $documentList) = $this->load($layout);
 
@@ -60,6 +62,39 @@ class Html
         (new HtmlPhp($documentRoot))->process();
         (new HtmlSeparator($documentRoot, $this->generatedDirectory, $layout))->process();
 
+        $this->documentRoot = $documentRoot;
+
+        return $this;
+    }
+
+    /**
+     * @param string $id
+     * @return BlockNode|null
+     * @throws Exception
+     */
+    public function getNodeById(string $id): ?BlockNode
+    {
+        foreach ($this->documentRoot->getNodeList() as $item) {
+            if ($item->getAttribute('id') === $id) {
+                return $item;
+            }
+        }
+
+        return null;
+    }
+
+    /**
+     * @param string|null $layout
+     * @return string
+     * @throws Exception
+     */
+    public function render(?string $layout = null): string
+    {
+        if ($layout) {
+            $this->initialize($layout);
+        }
+
+        $documentRoot = $this->documentRoot;
         $file = $layout . '.php';
         $fileFull = $this->generatedDirectory . '/' . $layout . '.php';
         $fileFull = str_replace('\\', '/', $fileFull);
@@ -73,6 +108,11 @@ class Html
         return (string) (new Template($this->generatedDirectory))->setTemplate($file);
     }
 
+    /**
+     * @param string $template
+     * @return array
+     * @throws Exception
+     */
     public function load(string $template): array
     {
         $documentList = [];
@@ -85,6 +125,13 @@ class Html
         return [$documentRoot, $documentList];
     }
 
+    /**
+     * @param string $template
+     * @param Document|null $documentRoot
+     * @param array $documentList
+     * @return array
+     * @throws Exception
+     */
     private function loadItem(string $template, ?Document &$documentRoot, array &$documentList): array
     {
         $documentFile = $this->themeDirectory . '/' . $template . '.html';

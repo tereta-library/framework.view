@@ -35,7 +35,7 @@ class Node extends DomNode
 
         $content = substr($content, 2);
 
-        if (preg_match('/^render\s+\$([a-z0-9_\-\[\]\'\"]+)\s*$/Ui', $content, $matches)) {
+        if (preg_match('/^echo\s+\$([a-z0-9_\-\[\]\'\"]+)\s*$/Ui', $content, $matches)) {
             $variable = $matches[1];
             return "<?php echo \${$variable} ?>";
         }
