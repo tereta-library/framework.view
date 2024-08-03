@@ -24,7 +24,7 @@ use Exception;
  */
 class Block
 {
-    public function __construct(private Document &$document)
+    public function __construct(private Document &$document, private string $themeDirectory)
     {
     }
 
@@ -44,7 +44,7 @@ class Block
         }
 
         $block = new BlockNode($this->document);
-        $block->setClass($blockClass);
+        $block->setBlock(new $blockClass($this->themeDirectory));
         $block->import($node->export());
         $node->getParent()->replaceChild($node, $block);
     }

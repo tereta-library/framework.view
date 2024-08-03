@@ -27,7 +27,7 @@ class Separator
                 continue;
             }
 
-            $file = $this->layout . '/' . ltrim(strtolower($node->getClass()), '\/') . '.php';
+            $file = $this->layout . '/' . ltrim(strtolower($node->getBlockIdentifier()), '\/') . '.php';
             $file = str_replace('\\', '/', $file);
             $fileFull = $this->generatedDirectory . '/' . $file;
             $dir = dirname($fileFull);

@@ -58,7 +58,7 @@ class Html
             $update->update($item);
         }
 
-        (new HtmlBlock($documentRoot))->process();
+        (new HtmlBlock($documentRoot, $this->generatedDirectory))->process();
         (new HtmlPhp($documentRoot))->process();
         (new HtmlSeparator($documentRoot, $this->generatedDirectory, $layout))->process();
 
@@ -67,16 +67,11 @@ class Html
         return $this;
     }
 
-    /**
-     * @param string $id
-     * @return BlockNode|null
-     * @throws Exception
-     */
-    public function getNodeById(string $id): ?BlockNode
+    public function getBlockById(string $id)
     {
         foreach ($this->documentRoot->getNodeList() as $item) {
             if ($item->getAttribute('id') === $id) {
-                return $item;
+                return $item->getBlock();
             }
         }
 

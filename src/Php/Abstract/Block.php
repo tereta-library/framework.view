@@ -22,6 +22,9 @@ use Exception;
  */
 abstract class Block
 {
+    /**
+     * @var string|null $template
+     */
     protected ?string $template = null;
 
     /**
@@ -39,11 +42,10 @@ abstract class Block
         }
     }
 
-    public function create(string $block, string $template = null) : self
-    {
-        return (new $block($this->themeDirectory))->setTemplate($template);
-    }
-
+    /**
+     * @param string $template
+     * @return $this
+     */
     public function setTemplate(string $template): static
     {
         $this->template = $template;
@@ -51,7 +53,11 @@ abstract class Block
         return $this;
     }
 
-
+    /**
+     * @param string $variable
+     * @param mixed $value
+     * @return $this
+     */
     public function assign(string $variable, mixed $value): static
     {
         $this->data[$variable] = $value;

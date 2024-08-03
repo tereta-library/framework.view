@@ -25,6 +25,10 @@ class Node extends DomNode
 {
     private ?string $class = null;
     private ?string $template = null;
+    private ?string $blockIdentifier = null;
+    private ?AbstractBlock $block = null;
+
+    private static array $registeredBlock = [];
 
     public function renderContent(): string
     {
@@ -35,26 +39,58 @@ class Node extends DomNode
         return $return;
     }
 
-    public function setClass(string $class): static
-    {
-        $this->class = $class;
-        return $this;
+    /**
+     * @param AbstractBlock $block
+     * @return void
+     */
+    public function setBlock(AbstractBlock $block): void {
+        $blockIdentifier = get_class($block);
+        $this->block = $block;
+        $this->blockIdentifier = $blockIdentifier;
+
+        static::$registeredBlock[$blockIdentifier] = $block;
     }
 
-    public function getClass(): ?string
-    {
-        return $this->class;
+    /**
+     * @return AbstractBlock
+     */
+    public function getBlock(): AbstractBlock {
+        return $this->block;
     }
 
+    /**
+     * @return string
+     */
+    public function getBlockIdentifier(): string {
+        return $this->blockIdentifier;
+    }
+
+    /**
+     * @param string $block
+     * @return AbstractBlock
+     */
+    static public function getRegisteredBlock(string $block): AbstractBlock
+    {
+        return static::$registeredBlock[$block];
+    }
+
+    /**
+     * @param string $template
+     * @return $this
+     */
     public function setTemplate(string $template): static
     {
+        $this->block->setTemplate($template);
         $this->template = $template;
         return $this;
     }
 
+    /**
+     * @return string
+     */
     public function render(): string
     {
-        $blockClass = str_replace('\\', '\\\\', $this->class);
-        return "<?php echo $" . "this->create(\"{$blockClass}\", \"{$this->template}\")->render() ?>";
+        $blockClass = str_replace('\\', '\\\\', $this->blockIdentifier);
+        return "<?php echo \Framework\View\Html\Block\Node::getRegisteredBlock(\"{$blockClass}\")->render() ?>";
     }
 }
