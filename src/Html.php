@@ -49,6 +49,10 @@ class Html
     {
         list($documentRoot, $documentList) = $this->load($layout);
 
+        if (!$documentRoot && count($documentList) == 1) {
+            $documentRoot = $documentList[0];
+        }
+
         if (!$documentRoot) {
             throw new Exception('Root document is not defined');
         }
