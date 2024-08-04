@@ -20,7 +20,10 @@ use Exception;
  * @class Framework\View\Html\Update
  * @package Framework\View\Html
  * @link https://tereta.dev
+ * @since 2020-2024
+ * @license   http://www.apache.org/licenses/LICENSE-2.0  Apache License 2.0
  * @author Tereta Alexander <tereta.alexander@gmail.com>
+ * @copyright 2020-2024 Tereta Alexander
  */
 class Update
 {
