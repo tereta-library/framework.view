@@ -1,5 +1,8 @@
 {
     "name": "tereta/framework.view",
+    "description": "Part of framework to process view",
+    "license": "Apache-2.0",
+    "version": "0.0.19",
     "type": "library",
     "autoload": {
         "psr-4": {
@@ -13,6 +16,6 @@
         }
     ],
     "require": {
-        "tereta/framework.pattern": "^0.0.18"
+        "tereta/framework.pattern": "^0.0.19"
     }
 }
