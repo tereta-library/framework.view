@@ -43,6 +43,16 @@ class Node extends DomNode
             return "<?php echo \${$variable} ?>";
         }
 
+        if (preg_match('/^json\s+\$([a-z0-9_\-\[\]\'\"]+)\s*$/Ui', $content, $matches)) {
+            $variable = $matches[1];
+            return "<?php echo json_encode(\${$variable}) ?>";
+        }
+
+        if (preg_match('/^comment\s+\$([a-z0-9_\-\[\]\'\"]+)\s*$/Ui', $content, $matches)) {
+            $variable = $matches[1];
+            return "<?php echo '<!-- ' . \${$variable} . '-->' ?>";
+        }
+
         if (preg_match('/^if\s+(.+)\s*$/Ui', $content, $matches)) {
             $variable = $matches[1];
             return $this->renderIf($variable);
@@ -81,10 +91,10 @@ class Node extends DomNode
     private function renderForeach(string $variable, string $as, ?string $key = null): string
     {
         if ($key) {
-            return "<?php foreach ($" . $variable . " as $" . $key . " => $" . $as . ") : ?>";
+            return "<?php foreach (isset($" . $variable . ") ? $" . $variable . " : [] as $" . $key . " => $" . $as . ") : ?>";
         }
 
-        return "<?php foreach ($" . $variable . " as $" . $as . ") : ?>";
+        return "<?php foreach (isset($" . $variable . ") ? $" . $variable . " : [] as $" . $as . ") : ?>";
     }
 
     /**
@@ -93,9 +103,10 @@ class Node extends DomNode
      */
     private function renderIf(string $condition): string
     {
-        if (!preg_match('/^[0-9a-zA-Z\s\$\-\>]+$/Usi', $condition, $matches)) {
-            return parent::render();
+        if (preg_match('/^\$([0-9a-zA-Z]+)(\[[\'"0-9a-zA-Z]+\])*$/Usi', $condition, $matches)) {
+            return "<?php if (isset({$condition}) ? {$condition} : false): ?>";
         }
-        return "<?php if ({$condition}): ?>";
+
+        return parent::render();
     }
 }
