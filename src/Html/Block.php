@@ -4,7 +4,6 @@ namespace Framework\View\Html;
 
 use Framework\Dom\Document;
 use Framework\View\Html\Block\Node as BlockNode;
-use Exception;
 
 /**
  * ···························WWW.TERETA.DEV······························
@@ -42,12 +41,17 @@ class Block
         $blockClass = $node->getAttribute('data-backend-block');
         if (!$blockClass) return;
 
+        $blockData = trim($node->getAttribute('data-backend-data'));
+        if ($blockData && substr($blockData, 0, 1) != '{' && substr($blockData, -1, 1) != '}') {
+            $blockData = "{{$blockData}}";
+        }
+
         if (substr($blockClass, 0, 1) != '\\') {
             $blockClass = "\\{$blockClass}";
         }
 
         $block = new BlockNode($this->document);
-        $block->setBlock(new $blockClass($this->themeDirectory));
+        $block->setBlock(new $blockClass($this->themeDirectory, $blockData ? json_decode($blockData, true) : []));
         $block->import($node->export());
         $node->getParent()->replaceChild($node, $block);
     }

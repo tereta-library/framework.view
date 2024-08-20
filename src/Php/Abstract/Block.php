@@ -94,6 +94,7 @@ abstract class Block
 
     /**
      * @return string
+     * @throws Exception
      */
     public function __toString(): string
     {
@@ -104,8 +105,45 @@ abstract class Block
      * @param string $name
      * @return mixed
      */
+    public function get(string $name): mixed
+    {
+        return $this->data[$name] ?? null;
+    }
+
+    /**
+     * @param string $name
+     * @param mixed $value
+     * @return void
+     */
+    public function set(string $name, mixed $value): void
+    {
+        $this->data[$name] = $value;
+    }
+
+    /**
+     * @return array
+     */
+    public function getData(): array
+    {
+        return $this->data;
+    }
+
+    /**
+     * @param string $name
+     * @return mixed
+     */
     public function __get(string $name): mixed
     {
         return $this->data[$name] ?? null;
+    }
+
+    /**
+     * @param string $name
+     * @param mixed $value
+     * @return void
+     */
+    public function __set(string $name, mixed $value): void
+    {
+        $this->set($name, $value);
     }
 }

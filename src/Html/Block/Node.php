@@ -2,6 +2,7 @@
 
 namespace Framework\View\Html\Block;
 
+use Framework\Dom\Document;
 use Framework\Dom\Node as DomNode;
 use Framework\View\Php\Abstract\Block as AbstractBlock;
 
@@ -26,13 +27,42 @@ use Framework\View\Php\Abstract\Block as AbstractBlock;
  */
 class Node extends DomNode
 {
+    /**
+     * @var string|null $class
+     */
     private ?string $class = null;
+
+    /**
+     * @var string|null $template
+     */
     private ?string $template = null;
+
+    /**
+     * @var string|null $blockIdentifier
+     */
     private ?string $blockIdentifier = null;
+
+    /**
+     * @var AbstractBlock|null $block
+     */
     private ?AbstractBlock $block = null;
 
+    /**
+     * @var array $registeredBlock
+     */
     private static array $registeredBlock = [];
 
+    /**
+     * @param Document $document
+     */
+    public function __construct(Document &$document)
+    {
+        parent::__construct($document);
+    }
+
+    /**
+     * @return string
+     */
     public function renderContent(): string
     {
         $return = '';
