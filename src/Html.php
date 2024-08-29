@@ -85,6 +85,11 @@ class Html
         return null;
     }
 
+    public function getBySelector(string $selector)
+    {
+        $e=0;
+    }
+
     /**
      * @param string|null $layout
      * @return string
