@@ -85,11 +85,6 @@ class Html
         return null;
     }
 
-    public function getBySelector(string $selector)
-    {
-        $e=0;
-    }
-
     /**
      * @param string|null $layout
      * @return string
@@ -142,8 +137,12 @@ class Html
     private function loadItem(string $template, ?Document &$documentRoot, array &$documentList): array
     {
         $documentFile = $this->themeDirectory . '/' . $template . '.html';
-        if (!is_file($documentFile)) throw new Exception('Template file not found: ' . $documentFile);
-        if (in_array($template, $this->loadedUpdates)) return throw new Exception('Update file already loaded: ' . $documentFile);
+        if (!is_file($documentFile)) {
+            throw new Exception('Template file not found: ' . $documentFile);
+        }
+        if (in_array($template, $this->loadedUpdates)) {
+            return throw new Exception('Update file already loaded: ' . $documentFile);
+        }
         $this->loadedUpdates[] = $template;
 
         $document = file_get_contents($documentFile);

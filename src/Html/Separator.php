@@ -34,7 +34,7 @@ class Separator
             if (!is_dir($dir)) {
                 mkdir($dir, 0777, true);
             }
-            $content = $node->renderContent();
+            $content = $node->renderContent(true);
             file_put_contents($fileFull, $content);
             $node->setTemplate($file);
             $node->clearChildren();
