@@ -53,6 +53,11 @@ class Node extends DomNode
     private static array $registeredBlock = [];
 
     /**
+     * @var int $blockCounter
+     */
+    private static int $blockCounter = 0;
+
+    /**
      * @param Document $document
      */
     public function __construct(Document &$document)
@@ -81,9 +86,13 @@ class Node extends DomNode
      * @return void
      */
     public function setBlock(AbstractBlock $block): void {
-        $blockIdentifier = get_class($block);
+        self::$blockCounter++;
         $this->block = $block;
-        $this->blockIdentifier = $blockIdentifier;
+        $this->blockIdentifier = $blockIdentifier = get_class($block);
+
+        if (isset(static::$registeredBlock[$blockIdentifier])) {
+            $this->blockIdentifier = $blockIdentifier = get_class($block) . '#' . self::$blockCounter;
+        }
 
         static::$registeredBlock[$blockIdentifier] = $block;
     }
