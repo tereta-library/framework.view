@@ -61,12 +61,11 @@ class Node extends DomNode
     }
 
     /**
-     * @param bool $includingTag
      * @return string
      */
-    public function renderContent(bool $includingTag = false): string
+    public function renderContent(): string
     {
-        if ($this->getName() != 'backend:block') {
+        if ($this->getName() != 'backend:container') {
             return parent::render();
         }
 
