@@ -11,7 +11,7 @@ class Renderer
 {
     public function verify(string $expression): ?array
     {
-        if (!preg_match('/^\$([A-Za-z0-9]+)(((\[[a-zA-Z]+\])|(->[a-zA-Z]+)(\(.*\))?)*)$/', $expression, $matches)) {
+        if (!preg_match('/^\s*\$([A-Za-z0-9]+)(((\[[a-zA-Z0-9]+\])|(->[a-zA-Z]+)(\(.*\))?)*)$/', $expression, $matches)) {
             return null;
         }
 
@@ -32,7 +32,7 @@ class Renderer
         }
 
         if (!$matched = $this->verify($expression)) {
-            throw new Exception("Wrong attribute bind variable ({$expression})");
+            throw new Exception("Wrong attribute bind expression ({$expression})");
         }
 
         list ($variable, $parts) = $matched;
@@ -59,7 +59,7 @@ class Renderer
                 continue;
             }
 
-            throw new Exception("Wrong attribute bind variable ({$expression})");
+            throw new Exception("Wrong attribute bind expression ({$expression})");
         }
 
         return $render;
@@ -74,7 +74,7 @@ class Renderer
                 $expression = substr($expression, 1);
 
                 if (!preg_match('/^(.*?[^\\\\])\'(, |$)/', $expression, $matches)) {
-                    throw new Exception("Wrong attribute bind variable ({$expression})");
+                    throw new Exception("Wrong attribute bind expression ({$expression})");
                 }
 
                 $value = $matches[1];

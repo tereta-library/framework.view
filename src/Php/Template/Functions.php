@@ -1,8 +1,7 @@
 <?php declare(strict_types=1);
 
-namespace Framework\View\Php;
+namespace Framework\View\Php\Template;
 
-use Framework\View\Php\Abstract\Block as AbstractBlock;
 use Framework\View\Php\Template\Functions as TemplateFunctions;
 
 /**
@@ -24,10 +23,33 @@ use Framework\View\Php\Template\Functions as TemplateFunctions;
  * @author Tereta Alexander <tereta.alexander@gmail.com>
  * @copyright 2020-2024 Tereta Alexander
  */
-class Template extends AbstractBlock{
-    protected function construct(): void
+class Functions
+{
+    /**
+     * @var Functions|null $instance
+     */
+    private static ?TemplateFunctions $instance = null;
+
+    /**
+     * @return $this
+     */
+    public static function getInstance(): static
     {
-        $this->assign('string', TemplateFunctions::getInstance());
-        parent::construct();
+        if (self::$instance) {
+            return self::$instance;
+        }
+        return self::$instance = new static();
+    }
+
+    /**
+     * @param string $prefix
+     * @param string $test
+     * @return string
+     */
+    public function concat(string $prefix, string $test): string
+    {
+        return $prefix . $test;
     }
 }
+
+
