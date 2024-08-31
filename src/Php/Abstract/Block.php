@@ -93,6 +93,15 @@ abstract class Block
     }
 
     /**
+     * @param string $value
+     * @return string
+     */
+    public function quoteAttribute(string $value): string
+    {
+        return '"' . htmlspecialchars($value, ENT_QUOTES, 'UTF-8') . '"';
+    }
+
+    /**
      * @return string
      * @throws Exception
      */

@@ -82,8 +82,9 @@ class Php
         $variable = $bind['variable'];
 
         $render = $this->phpRenderer->render($variable);
-        $render = "<?php echo {$render} ?>";
-        $node->getTag()->setAttribute($attribute, $render);
+        $render = "<?php if ({$render}) : ?>{$attribute}=<?php echo \$this->quoteAttribute({$render}) ?><?php endif ?>";
+        $node->getTag()->setAttribute($attribute, null);
+        $node->getTag()->setAttributeScript($render);
     }
 
 
