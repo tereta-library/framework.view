@@ -3,6 +3,8 @@
 namespace Framework\View\Html\Php;
 
 use Framework\Dom\Node as DomNode;
+use Framework\View\Html\Php\Renderer as PhpRenderer;
+use Exception;
 
 /**
  * ···························WWW.TERETA.DEV······························
@@ -26,7 +28,21 @@ use Framework\Dom\Node as DomNode;
 class Node extends DomNode
 {
     /**
+     * @var Renderer $phpRenderer
+     */
+    private PhpRenderer $phpRenderer;
+
+    /**
+     * @return void
+     */
+    protected function construct(): void
+    {
+        $this->phpRenderer = new PhpRenderer;
+    }
+
+    /**
      * @return string
+     * @throws Exception
      */
     public function render(): string
     {
@@ -38,37 +54,44 @@ class Node extends DomNode
 
         $content = substr($content, 2);
 
-        if (preg_match('/^echo\s+\$([a-z0-9_\-\[\]\'\"]+)\s*$/Ui', $content, $matches)) {
+        if (preg_match('/^echo\s+(.+)\s*$/Ui', $content, $matches)) {
             $variable = $matches[1];
-            return "<?php echo \${$variable} ?>";
+            $rendered = $this->phpRenderer->render($variable);
+
+            return "<?php echo {$rendered} ?>";
         }
 
-        if (preg_match('/^json\s+\$([a-z0-9_\-\[\]\'\"]+)\s*$/Ui', $content, $matches)) {
+        if (preg_match('/^json\s+(.+)\s*$/Ui', $content, $matches)) {
             $variable = $matches[1];
-            return "<?php echo json_encode(\${$variable}) ?>";
+            $rendered = $this->phpRenderer->render($variable);
+            return "<?php echo json_encode({$rendered}) ?>";
         }
 
-        if (preg_match('/^comment\s+\$([a-z0-9_\-\[\]\'\"]+)\s*$/Ui', $content, $matches)) {
+        if (preg_match('/^comment\s+(.+)\s*$/Ui', $content, $matches)) {
             $variable = $matches[1];
-            return "<?php echo '<!-- ' . \${$variable} . '-->' ?>";
+            $rendered = $this->phpRenderer->render($variable);
+            return "<?php echo '<!-- ' . {$rendered} . '-->' ?>";
         }
 
         if (preg_match('/^if\s+(.+)\s*$/Ui', $content, $matches)) {
             $variable = $matches[1];
-            return $this->renderIf($variable);
+            $rendered = $this->phpRenderer->render($variable);
+            return $this->renderIf($rendered);
         }
 
-        if (preg_match('/^foreach\s+\$([a-z0-9_\-\[\]\'\"]+)\s+as\s+\$([a-z0-9_\-\[\]\'\"]+)\s*$/Ui', $content, $matches)) {
+        if (preg_match('/^foreach\s+(.+)\s+as\s+\$([a-z0-9_\-\[\]\'\"]+)\s*$/Ui', $content, $matches)) {
             $variable = $matches[1];
             $as = $matches[2];
-            return $this->renderForeach($variable, $as);
+            $rendered = $this->phpRenderer->render($variable);
+            return $this->renderForeach($rendered, $as);
         }
 
-        if (preg_match('/^foreach\s+\$([a-z0-9_\-\[\]\'"]+)\s+as\s+\$([a-z0-9_\-\[\]\'"]+)\s*=\>\s*\$([a-z0-9_\-\[\]\'"]+)\s*$/Ui', $content, $matches)) {
+        if (preg_match('/^foreach\s+(.+)\s+as\s+\$([a-z0-9_\-\[\]\'"]+)\s*=\>\s*\$([a-z0-9_\-\[\]\'"]+)\s*$/Ui', $content, $matches)) {
             $variable = $matches[1];
             $key = $matches[2];
             $as = $matches[3];
-            return $this->renderForeach($variable, $as, $key);
+            $rendered = $this->phpRenderer->render($variable);
+            return $this->renderForeach($rendered, $as, $key);
         }
 
         if (preg_match('/^\s*endif\s*$/Ui', $content, $matches)) {
@@ -91,10 +114,10 @@ class Node extends DomNode
     private function renderForeach(string $variable, string $as, ?string $key = null): string
     {
         if ($key) {
-            return "<?php foreach (isset($" . $variable . ") ? $" . $variable . " : [] as $" . $key . " => $" . $as . ") : ?>";
+            return "<?php foreach (" . $variable . " as $" . $key . " => $" . $as . ") : ?>";
         }
 
-        return "<?php foreach (isset($" . $variable . ") ? $" . $variable . " : [] as $" . $as . ") : ?>";
+        return "<?php foreach (" . $variable . " as $" . $as . ") : ?>";
     }
 
     /**
@@ -103,10 +126,6 @@ class Node extends DomNode
      */
     private function renderIf(string $condition): string
     {
-        if (preg_match('/^\$([0-9a-zA-Z]+)(\[[\'"0-9a-zA-Z]+\])*$/Usi', $condition, $matches)) {
-            return "<?php if (isset({$condition}) ? {$condition} : false): ?>";
-        }
-
-        return parent::render();
+        return "<?php if ({$condition}): ?>";
     }
 }

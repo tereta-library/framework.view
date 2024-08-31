@@ -5,6 +5,7 @@ namespace Framework\View\Html;
 use Framework\Dom\Document;
 use Framework\Dom\Node;
 use Framework\View\Html\Php\Node as PhpNode;
+use Framework\View\Html\Php\Renderer as PhpRenderer;
 use Exception;
 
 /**
@@ -12,10 +13,23 @@ use Exception;
  */
 class Php
 {
+    /**
+     * @var PhpRenderer
+     */
+    private PhpRenderer $phpRenderer;
+
+    /**
+     * @param Document $document
+     */
     public function __construct(private Document &$document)
     {
+        $this->phpRenderer = new PhpRenderer;
     }
 
+    /**
+     * @return void
+     * @throws Exception
+     */
     public function process() {
         foreach($this->document->getNodeList() as $node) {
             $this->processComment($node);
@@ -37,10 +51,6 @@ class Php
         if (!$bind) {
             return;
         }
-
-//        if (!preg_match_all('/(((attribute):([a-z0-9]+):((\$[a-z0-9]+)(\[\'[a-z0-9]+\'\])*))(; +|$))/i', $bind, $matches)) {
-//            return;
-//        }
 
         if (!preg_match_all('/((attribute):([a-z0-9]+):((.+)(; +|$)))/Usi', $bind, $matches)) {
             return;
@@ -71,46 +81,11 @@ class Php
         $attribute = $bind['parameter'];
         $variable = $bind['variable'];
 
-        $render = $this->processBindAttributeVariable($variable);
+        $render = $this->phpRenderer->render($variable);
         $render = "<?php echo {$render} ?>";
         $node->getTag()->setAttribute($attribute, $render);
     }
 
-    private function processBindAttributeVariable(string $variable)
-    {
-        if (preg_match('/^[1-9]+$/', $variable, $matches)) {
-            return $variable;
-        }
-
-        if (!preg_match('/^\$([A-Za-z0-9]+)(((\[[a-zA-Z]+\])|(->[a-zA-Z]+)(\(.*\))?)*)$/', $variable, $matches)) {
-            throw new Exception('Wrong attribute bind variable');
-        }
-
-        $variable = '$' . $matches[1];
-        $parts = $matches[2];
-        $render = $variable;
-
-        while ($parts) {
-            if (preg_match('/^\[([a-z0-9A-Z]+)\]/Usi', $parts, $matches)) {
-                $render .= "['{$matches[1]}']";
-                $parts = substr($parts, strlen($matches[0]));
-                continue;
-            }
-
-            if (preg_match('/^->([a-z0-9A-Z]+)\((.*)\)/', $parts, $matches)) {
-                $render .= "->{$matches[1]}(" . $this->processBindAttributeVariable($matches[2]) . ")";
-                $parts = substr($parts, strlen($matches[0]));
-                continue;
-            }
-
-            if (preg_match('/^->([a-z0-9A-Z]+)/Usi', $parts, $matches)) {
-                $render .= "->{$matches[1]}";
-                $parts = substr($parts, strlen($matches[0]));
-            }
-        }
-
-        return $render;
-    }
 
     /**
      * @param $node
