@@ -10,6 +10,8 @@ use Framework\View\Html\Block as HtmlBlock;
 use Framework\View\Html\Php as HtmlPhp;
 use Framework\View\Html\Separator as HtmlSeparator;
 use Framework\View\Php\Template;
+use Framework\View\Html\Block\Node as HtmlBlockNode;
+use Framework\View\Php\Abstract\Block as AbstractBlock;
 
 /**
  * ···························WWW.TERETA.DEV······························
@@ -32,8 +34,30 @@ use Framework\View\Php\Template;
  */
 class Html
 {
+    /**
+     * @var Document|null
+     */
     private ?Document $documentRoot = null;
+
+    /**
+     * @var array
+     */
     private array $loadedUpdates = [];
+
+    /**
+     * @var string
+     */
+    private string $layout;
+
+    /**
+     * @var array
+     */
+    private array $blockIndex = [];
+
+    /**
+     * @var array
+     */
+    private array $blockList = [];
 
     /**
      * @param string $theme Theme path
@@ -49,6 +73,7 @@ class Html
      */
     public function initialize(string $layout): static
     {
+        $this->layout = $layout;
         list($documentRoot, $documentList) = $this->load($layout);
 
         if (!$documentRoot && count($documentList) == 1) {
@@ -66,6 +91,23 @@ class Html
 
         (new HtmlBlock($documentRoot, $this->generatedDirectory))->process();
         (new HtmlPhp($documentRoot))->process();
+
+        $this->blockIndex = [];
+        $this->blockList = [];
+        foreach ($documentRoot->getNodeList() as $item) {
+            if (!$item instanceof HtmlBlockNode) {
+                continue;
+            }
+
+            $this->blockList[] = $item;
+
+            if ($item->getAttribute('id')) {
+                $this->blockIndex[$item->getAttribute('id')] = $item;
+            }
+        }
+
+        // On separation of the blocks into files - clearing child blocks performing
+        // After that process no tree actions allowed
         (new HtmlSeparator($documentRoot, $this->generatedDirectory, $layout))->process();
 
         $this->documentRoot = $documentRoot;
@@ -73,15 +115,13 @@ class Html
         return $this;
     }
 
-    public function getBlockById(string $id)
+    /**
+     * @param string $id
+     * @return AbstractBlock|null
+     */
+    public function getBlockById(string $id): ?AbstractBlock
     {
-        foreach ($this->documentRoot->getNodeList() as $item) {
-            if ($item->getAttribute('id') === $id) {
-                return $item->getBlock();
-            }
-        }
-
-        return null;
+        return $this->blockIndex[$id]->getBlock() ?? null;
     }
 
     /**
@@ -93,6 +133,14 @@ class Html
     {
         if ($layout) {
             $this->initialize($layout);
+        }
+
+        if (!$layout && $this->layout) {
+            $layout = $this->layout;
+        }
+
+        foreach ($this->blockList as $item) {
+            $item->getBlock()->initialize($this);
         }
 
         $documentRoot = $this->documentRoot;

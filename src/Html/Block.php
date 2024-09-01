@@ -31,7 +31,7 @@ class Block
     }
 
     public function process() {
-        foreach($this->document->getNodeList() as $node) {
+        foreach($this->document->getNodeList() as $key => $node) {
             $this->processBlock($node);
         }
     }

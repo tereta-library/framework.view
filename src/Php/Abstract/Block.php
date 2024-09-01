@@ -3,6 +3,7 @@
 namespace Framework\View\Php\Abstract;
 
 use Exception;
+use Framework\View\Html as Layout;
 
 /**
  * ···························WWW.TERETA.DEV······························
@@ -47,7 +48,22 @@ abstract class Block
         $this->construct();
     }
 
+    /**
+     * Additional constructor for child classes
+     *
+     * @return void
+     */
     protected function construct(): void
+    {
+    }
+
+    /**
+     * Initialisation before rendering to set necessary relations beetling blocks
+     *
+     * @param Layout $layout
+     * @return void
+     */
+    public function initialize(Layout $layout): void
     {
     }
 
