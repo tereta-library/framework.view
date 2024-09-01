@@ -9,6 +9,10 @@ use Exception;
  */
 class Renderer
 {
+    /**
+     * @param string $expression
+     * @return array|null
+     */
     public function verify(string $expression): ?array
     {
         if (!preg_match('/^\s*\$([A-Za-z0-9]+)(((\[[a-zA-Z0-9]+\])|(->[a-zA-Z]+)(\(.*\))?)*)$/', $expression, $matches)) {
@@ -21,6 +25,11 @@ class Renderer
         return [$variable, $parts];
     }
 
+    /**
+     * @param string $expression
+     * @return string
+     * @throws Exception
+     */
     public function render(string $expression): string
     {
         if (preg_match('/^[1-9]+$/', $expression, $matches)) {
@@ -65,6 +74,11 @@ class Renderer
         return $render;
     }
 
+    /**
+     * @param string $expression
+     * @return string
+     * @throws Exception
+     */
     private function renderFunction(string $expression): string
     {
         $parameters = [];

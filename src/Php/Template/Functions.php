@@ -50,6 +50,15 @@ class Functions
     {
         return $prefix . $test;
     }
+
+    /**
+     * @param string $string
+     * @return string
+     */
+    public function capitalUpperCase(string $string): string
+    {
+        return ucfirst($string);
+    }
 }
 
 

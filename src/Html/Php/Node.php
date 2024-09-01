@@ -79,6 +79,14 @@ class Node extends DomNode
             return $this->renderIf($rendered);
         }
 
+        if (preg_match('/^foreach\s+([^ ]+)\s*$/Ui', $content, $matches)) {
+            $variable = $matches[1];
+            $key = 'key';
+            $as = 'item';
+            $rendered = $this->phpRenderer->render($variable);
+            return $this->renderForeach($rendered, $as, $key);
+        }
+
         if (preg_match('/^foreach\s+(.+)\s+as\s+\$([a-z0-9_\-\[\]\'\"]+)\s*$/Ui', $content, $matches)) {
             $variable = $matches[1];
             $as = $matches[2];
