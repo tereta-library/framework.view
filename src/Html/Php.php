@@ -60,10 +60,12 @@ class Php
 
         $binds = [];
         foreach ($matches[2] as $index => $type) {
+            $typeVariable = $matches[4][$index];
+            $typeVariable = str_ends_with($typeVariable, '; ') ? substr($typeVariable, 0, -2) : $typeVariable;
             $binds[] = [
                 'type' => $type,
                 'parameter' => $matches[3][$index],
-                'variable' => $matches[4][$index],
+                'variable' => $typeVariable
             ];
         }
 
