@@ -60,7 +60,8 @@ class Html
     private array $blockList = [];
 
     /**
-     * @param string $theme Theme path
+     * @param string $themeDirectory
+     * @param string $generatedDirectory
      */
     public function __construct(private string $themeDirectory, private string $generatedDirectory)
     {
