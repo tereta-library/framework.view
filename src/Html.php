@@ -62,8 +62,9 @@ class Html
     /**
      * @param string $themeDirectory
      * @param string $generatedDirectory
+     * @param array $dependencies
      */
-    public function __construct(private string $themeDirectory, private string $generatedDirectory)
+    public function __construct(private string $themeDirectory, private string $generatedDirectory, private array $dependencies = [])
     {
     }
 
@@ -182,9 +183,17 @@ class Html
      * @return array
      * @throws Exception
      */
-    private function loadItem(string $template, ?Document &$documentRoot, array &$documentList): array
+    private function loadItem(string $template, ?Document &$documentRoot, array &$documentList, bool $isDependency = false): array
     {
-        $documentFile = $this->themeDirectory . '/' . $template . '.html';
+        if (!$isDependency) {
+            list($documentFile, $dependency) = $this->getFile($template);
+            foreach ($dependency as $dependencyFile) {
+                $this->loadItem($dependencyFile, $documentRoot, $documentList, true);
+            }
+        } else {
+            $documentFile = $template;
+        }
+
         if (!is_file($documentFile)) {
             throw new Exception('Template file not found: ' . $documentFile);
         }
@@ -213,6 +222,30 @@ class Html
         }
 
         return $documentList;
+    }
+
+    private function getFile(string $template): array
+    {
+        $resultDependency = [];
+        foreach ($this->dependencies as $dependency) {
+            $file = "{$dependency}/layout/{$template}.html";
+            if (!is_file($file)) {
+                continue;
+            }
+            $resultDependency[] = $file;
+        }
+
+        $initialFile = $this->themeDirectory . '/' . $template . '.html';
+        if (is_file($initialFile)) {
+            return [$initialFile, $resultDependency];
+        }
+
+        if ($resultDependency && $resultDependency[0]) {
+            $file = array_shift($resultDependency);
+            return [$file, $resultDependency];
+        }
+
+        return [$initialFile, $resultDependency];
     }
 
     private function isRootDocument(Node $node): bool
