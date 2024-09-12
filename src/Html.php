@@ -169,9 +169,10 @@ class Html
         $documentList = [];
         $documentRoot = null;
         $this->loadItem($template, $documentRoot, $documentList);
-        foreach ($documentList as $key => $document) {
-            $documentList[$key] = $document;
-        }
+        // @todo: looks like some artifact or not needed - to remove
+        //foreach ($documentList as $key => $document) {
+        //    $documentList[$key] = $document;
+        //}
 
         return [$documentRoot, $documentList];
     }
@@ -180,16 +181,15 @@ class Html
      * @param string $template
      * @param Document|null $documentRoot
      * @param array $documentList
+     * @param bool $isDependency
      * @return array
      * @throws Exception
      */
     private function loadItem(string $template, ?Document &$documentRoot, array &$documentList, bool $isDependency = false): array
     {
+        $dependency = [];
         if (!$isDependency) {
             list($documentFile, $dependency) = $this->getFile($template);
-            foreach ($dependency as $dependencyFile) {
-                $this->loadItem($dependencyFile, $documentRoot, $documentList, true);
-            }
         } else {
             $documentFile = $template;
         }
@@ -205,6 +205,22 @@ class Html
         $document = file_get_contents($documentFile);
         $document = (new Document($document, $documentFile));
         $nodeList = $document->getNodeList();
+
+        $allowDependency = true;
+        foreach ($nodeList as $node) {
+            if ($node->getName() == 'meta' && $node->getAttribute('name') == 'backend-allowDependency') {
+                $allowDependency = in_array($node->getAttribute('content'), ['true', 'yes']);
+                break;
+            }
+        }
+
+        if (!$allowDependency) {
+            $dependency = [];
+        }
+
+        foreach ($dependency as $dependencyFile) {
+            $this->loadItem($dependencyFile, $documentRoot, $documentList, true);
+        }
 
         $isRootDocument = false;
         foreach ($nodeList as $node) {
@@ -224,6 +240,10 @@ class Html
         return $documentList;
     }
 
+    /**
+     * @param string $template
+     * @return array
+     */
     private function getFile(string $template): array
     {
         $resultDependency = [];
@@ -248,6 +268,10 @@ class Html
         return [$initialFile, $resultDependency];
     }
 
+    /**
+     * @param Node $node
+     * @return bool
+     */
     private function isRootDocument(Node $node): bool
     {
         if ($node->getName() !== 'meta' ||
@@ -265,6 +289,15 @@ class Html
         return false;
     }
 
+    /**
+     * Do update and add layouts
+     *
+     * @param Node $node
+     * @param Document|null $documentRoot
+     * @param array $documentList
+     * @return bool
+     * @throws Exception
+     */
     private function update(Node $node, ?Document &$documentRoot, array &$documentList = []): bool
     {
         if ($node->getName() !== 'meta' ||
