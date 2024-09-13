@@ -3,6 +3,7 @@
 namespace Framework\View\Html\Php;
 
 use Exception;
+use Framework\View\Html\Php\Renderer\CallFunction;
 
 /**
  * @class Framework\View\Html\Php\Renderer
@@ -55,10 +56,15 @@ class Renderer
                 continue;
             }
 
-            if (preg_match('/^->([a-z0-9A-Z]+)\((.*)\)/', $parts, $matches)) {
-                $parametersRender = $this->renderFunction($matches[2]);
-                $render .= "->{$matches[1]}(" . $parametersRender . ")";
-                $parts = substr($parts, strlen($matches[0]));
+            if ($function = CallFunction::parseFunction($parts)) {
+                list($function, $arguments, $length) = $function;
+                try {
+                    $parametersRender = $this->renderFunction($arguments);
+                } catch (Exception $e) {
+                    throw $e;
+                }
+                $render .= "->{$function}(" . $parametersRender . ")";
+                $parts = substr($parts, $length);
                 continue;
             }
 
