@@ -218,6 +218,7 @@ class Html
             $dependency = [];
         }
 
+        $dependency = array_reverse($dependency);
         foreach ($dependency as $dependencyFile) {
             $this->loadItem($dependencyFile, $documentRoot, $documentList, true);
         }
