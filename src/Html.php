@@ -241,11 +241,24 @@ class Html
         if (!is_dir($dir)) {
             mkdir($dir, 0777, true);
         }
-        if (!$this->useCache || !is_file($fileFull)) {
+
+        $render = true;
+        if ($this->useCache && is_file($fileFull)) {
+            $documentRoot->render(false);
+            $render = false;
+        }
+
+        if ($render && !is_file($fileFull)) {
             $content = "<!DOCTYPE html>\n" . $documentRoot->render();
             file_put_contents($fileFull, $content);
-        } else {
-            $documentRoot->render(false);
+            $render = false;
+        }
+
+        if ($render) {
+            $content = "<!DOCTYPE html>\n" . $documentRoot->render();
+        }
+        if ($render && $content !== file_get_contents($fileFull)) {
+            file_put_contents($fileFull, $content);
         }
 
         return (string) (new Template($this->generatedDirectory))->setTemplate($file);
