@@ -171,4 +171,9 @@ abstract class Block
     {
         $this->set($name, $value);
     }
+
+    public function __sleep()
+    {
+        return ['template'];
+    }
 }

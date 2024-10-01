@@ -64,12 +64,14 @@ class Html
      * @param string $generatedDirectory
      * @param string $cacheDirectory
      * @param array $dependencies
+     * @param bool $useCache
      */
     public function __construct(
         private string $themeDirectory,
         private string $generatedDirectory,
         private string $cacheDirectory,
-        private array $dependencies = []
+        private array $dependencies = [],
+        private bool $useCache = true
     ) {
     }
 
@@ -86,11 +88,33 @@ class Html
 
         $this->layout = $layout;
 
-        // @todo need to move whole generation it into cache
-        if (false && $cached = $this->getCache("initialize.{$layout}")) {
-            $this->documentRoot = $documentRoot = unserialize($cached);
-            $this->fillBlockIndexes($documentRoot);
-            return $this;
+        $documentRoot = $this->initializeUpdates($layout);
+
+        (new HtmlBlock($documentRoot, $this->generatedDirectory))->process();
+        (new HtmlPhp($documentRoot))->process();
+
+        $this->fillBlockIndexes($documentRoot);
+
+        /**
+         * On separation of the blocks into files - clearing child blocks performing
+         * After that process no tree actions allowed
+         **/
+        (new HtmlSeparator($documentRoot, $this->generatedDirectory, $layout))->process();
+
+        $this->documentRoot = $documentRoot;
+
+        return $this;
+    }
+
+    /**
+     * @param string $layout
+     * @return Document
+     * @throws Exception
+     */
+    private function initializeUpdates(string $layout): Document
+    {
+        if ($this->useCache && $cached = $this->getCache("initialize.{$layout}")) {
+            return unserialize($cached);
         }
 
         list($documentRoot, $documentList) = $this->load($layout);
@@ -108,34 +132,18 @@ class Html
             $update->update($item);
         }
 
-        (new HtmlBlock($documentRoot, $this->generatedDirectory))->process();
-        (new HtmlPhp($documentRoot))->process();
-
-        $this->fillBlockIndexes($documentRoot);
-
-        /**
-         * On separation of the blocks into files - clearing child blocks performing
-         * After that process no tree actions allowed
-         **/
-        (new HtmlSeparator($documentRoot, $this->generatedDirectory, $layout))->process();
-
-        //$documentRootCache = serialize($documentRoot);
-        //$this->setCache("initialize.{$layout}", $documentRootCache);
-
-        if (false && $cached = $this->getCache("initialize.{$layout}")) {
-            define('ALEXDEBUG', true);
-            $this->documentRoot = $documentRoot = unserialize($cached);
-            $this->fillBlockIndexes($documentRoot);
-            return $this;
+        if ($this->useCache) {
+            $this->setCache("initialize.{$layout}", serialize($documentRoot));
         }
-
-        $this->documentRoot = $documentRoot;
-        // @todo need to move whole generation it into cache
-
-        return $this;
+        return $documentRoot;
     }
 
-    private function fillBlockIndexes($documentRoot): void
+    /**
+     * @param Document $documentRoot
+     * @return void
+     * @throws Exception
+     */
+    private function fillBlockIndexes(Document $documentRoot): void
     {
         $this->blockIndex = [];
         $this->blockList = [];
@@ -233,8 +241,12 @@ class Html
         if (!is_dir($dir)) {
             mkdir($dir, 0777, true);
         }
-        $content = "<!DOCTYPE html>\n" . $documentRoot->render();
-        file_put_contents($fileFull, $content);
+        if (!$this->useCache || !is_file($fileFull)) {
+            $content = "<!DOCTYPE html>\n" . $documentRoot->render();
+            file_put_contents($fileFull, $content);
+        } else {
+            $documentRoot->render(false);
+        }
 
         return (string) (new Template($this->generatedDirectory))->setTemplate($file);
     }
