@@ -32,12 +32,12 @@ abstract class Block
     protected ?string $template = null;
 
     /**
-     * @param string $themeDirectory
+     * @param string|null $themeDirectory
      * @param array $data
      * @param string|null $template
      */
     public function __construct(
-        private string $themeDirectory,
+        private ?string $themeDirectory = null,
         private array $data = [],
         string $template = null
     ) {

@@ -45,9 +45,9 @@ class Html
     private array $loadedUpdates = [];
 
     /**
-     * @var string
+     * @var string|null
      */
-    private string $layout;
+    private ?string $layout = null;
 
     /**
      * @var array
@@ -62,10 +62,15 @@ class Html
     /**
      * @param string $themeDirectory
      * @param string $generatedDirectory
+     * @param string $cacheDirectory
      * @param array $dependencies
      */
-    public function __construct(private string $themeDirectory, private string $generatedDirectory, private array $dependencies = [])
-    {
+    public function __construct(
+        private string $themeDirectory,
+        private string $generatedDirectory,
+        private string $cacheDirectory,
+        private array $dependencies = []
+    ) {
     }
 
     /**
@@ -75,7 +80,19 @@ class Html
      */
     public function initialize(string $layout): static
     {
+        if ($this->layout === $layout) {
+            return $this;
+        }
+
         $this->layout = $layout;
+
+        // @todo need to move whole generation it into cache
+        if (false && $cached = $this->getCache("initialize.{$layout}")) {
+            $this->documentRoot = $documentRoot = unserialize($cached);
+            $this->fillBlockIndexes($documentRoot);
+            return $this;
+        }
+
         list($documentRoot, $documentList) = $this->load($layout);
 
         if (!$documentRoot && count($documentList) == 1) {
@@ -94,6 +111,32 @@ class Html
         (new HtmlBlock($documentRoot, $this->generatedDirectory))->process();
         (new HtmlPhp($documentRoot))->process();
 
+        $this->fillBlockIndexes($documentRoot);
+
+        /**
+         * On separation of the blocks into files - clearing child blocks performing
+         * After that process no tree actions allowed
+         **/
+        (new HtmlSeparator($documentRoot, $this->generatedDirectory, $layout))->process();
+
+        //$documentRootCache = serialize($documentRoot);
+        //$this->setCache("initialize.{$layout}", $documentRootCache);
+
+        if (false && $cached = $this->getCache("initialize.{$layout}")) {
+            define('ALEXDEBUG', true);
+            $this->documentRoot = $documentRoot = unserialize($cached);
+            $this->fillBlockIndexes($documentRoot);
+            return $this;
+        }
+
+        $this->documentRoot = $documentRoot;
+        // @todo need to move whole generation it into cache
+
+        return $this;
+    }
+
+    private function fillBlockIndexes($documentRoot): void
+    {
         $this->blockIndex = [];
         $this->blockList = [];
         foreach ($documentRoot->getNodeList() as $item) {
@@ -107,12 +150,44 @@ class Html
                 $this->blockIndex[$item->getAttribute('id')] = $item;
             }
         }
+    }
 
-        // On separation of the blocks into files - clearing child blocks performing
-        // After that process no tree actions allowed
-        (new HtmlSeparator($documentRoot, $this->generatedDirectory, $layout))->process();
+    /**
+     * @param string $key
+     * @return string
+     */
+    private function getCacheFile(string $key): string
+    {
+        return "{$this->cacheDirectory}/{$key}.cache";
+    }
 
-        $this->documentRoot = $documentRoot;
+    /**
+     * @param string $key
+     * @return string|null
+     */
+    private function getCache(string $key): ?string
+    {
+        $file = $this->getCacheFile($key);
+        if (!is_file($file)) {
+            return null;
+        }
+
+        return file_get_contents($file);
+    }
+
+    /**
+     * @param string $key
+     * @param string $value
+     * @return $this
+     */
+    private function setCache(string $key, string $value): static
+    {
+        $file = $this->getCacheFile($key);
+        $dir = dirname($file);
+        if (!is_dir($dir)) {
+            mkdir($dir, 0777, true);
+        }
+        file_put_contents($file, $value);
 
         return $this;
     }
@@ -120,9 +195,14 @@ class Html
     /**
      * @param string $id
      * @return AbstractBlock|null
+     * @throws Exception
      */
     public function getBlockById(string $id): ?AbstractBlock
     {
+        if (!isset($this->blockIndex[$id])) {
+            throw new Exception("Block with id {$id} not found");
+        }
+
         return $this->blockIndex[$id]->getBlock() ?? null;
     }
 
@@ -169,10 +249,6 @@ class Html
         $documentList = [];
         $documentRoot = null;
         $this->loadItem($template, $documentRoot, $documentList);
-        // @todo: looks like some artifact or not needed - to remove
-        //foreach ($documentList as $key => $document) {
-        //    $documentList[$key] = $document;
-        //}
 
         return [$documentRoot, $documentList];
     }
