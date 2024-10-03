@@ -4,6 +4,8 @@ namespace Framework\View\Html;
 
 use Framework\Dom\Document;
 use Framework\View\Html\Block\Node as BlockNode;
+use Framework\Dom\Node;
+use Exception;
 
 /**
  * ···························WWW.TERETA.DEV······························
@@ -26,17 +28,30 @@ use Framework\View\Html\Block\Node as BlockNode;
  */
 class Block
 {
+    /**
+     * @param Document $document
+     * @param string $themeDirectory
+     */
     public function __construct(private Document &$document, private string $themeDirectory)
     {
     }
 
-    public function process() {
+    /**
+     * @return void
+     * @throws Exception
+     */
+    public function process(): void {
         foreach($this->document->getNodeList() as $key => $node) {
             $this->processBlock($node);
         }
     }
 
-    public function processBlock($node)
+    /**
+     * @param Node $node
+     * @return void
+     * @throws Exception
+     */
+    public function processBlock(Node $node): void
     {
         $blockClass = $node->getAttribute('data-backend-block');
         if (!$blockClass) return;
