@@ -5,6 +5,7 @@ namespace Framework\View;
 use Framework\Dom\Document;
 use Exception;
 use Framework\Dom\Node;
+use Framework\View\Html\Php\Interpolation;
 use Framework\View\Html\Update as HtmlUpdate;
 use Framework\View\Html\Block as HtmlBlock;
 use Framework\View\Html\Php as HtmlPhp;
@@ -60,6 +61,16 @@ class Html
     private array $blockList = [];
 
     /**
+     * @var Interpolation $interpolation
+     */
+    private Interpolation $interpolation;
+
+    /**
+     * @var array $variables
+     */
+    private array $variables;
+
+    /**
      * @param string $themeDirectory
      * @param string $generatedDirectory
      * @param string $cacheDirectory
@@ -73,6 +84,7 @@ class Html
         private array $dependencies = [],
         private bool $useCache = true
     ) {
+        $this->interpolation = new Interpolation;
     }
 
     /**
@@ -215,6 +227,27 @@ class Html
     }
 
     /**
+     * @param string|array $keyVariables
+     * @param array|null $variable
+     * @return $this
+     */
+    public function assign(string|array $keyVariables, mixed $variable = null): static
+    {
+        $isArrayMode = (is_array($keyVariables) && $variable === null);
+        foreach ($isArrayMode ? $keyVariables : [] as $key => $value) {
+            $this->variables[$key] = $value;
+        }
+
+        if ($isArrayMode) {
+            return $this;
+        }
+
+        $key = $keyVariables;
+        $this->variables[$key] = $variable;
+        return $this;
+    }
+
+    /**
      * @param string|null $layout
      * @return string
      * @throws Exception
@@ -249,19 +282,29 @@ class Html
         }
 
         if ($render && !is_file($fileFull)) {
-            $content = "<!DOCTYPE html>\n" . $documentRoot->render();
+            $content = "<!DOCTYPE html>\n" . $this->renderDocument($documentRoot);
             file_put_contents($fileFull, $content);
             $render = false;
         }
 
         if ($render) {
-            $content = "<!DOCTYPE html>\n" . $documentRoot->render();
+            $content = "<!DOCTYPE html>\n" . $this->renderDocument($documentRoot);
         }
         if ($render && $content !== file_get_contents($fileFull)) {
             file_put_contents($fileFull, $content);
         }
 
-        return (string) (new Template($this->generatedDirectory))->setTemplate($file);
+        return (string) (new Template($this->generatedDirectory))->assign($this->variables)->setTemplate($file);
+    }
+
+    /**
+     * @param Document $document
+     * @return string
+     * @throws Exception
+     */
+    private function renderDocument(Document $document): string
+    {
+        return $this->interpolation->process($document->render());
     }
 
     /**

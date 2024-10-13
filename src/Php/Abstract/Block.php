@@ -83,8 +83,16 @@ abstract class Block
      * @param mixed $value
      * @return $this
      */
-    public function assign(string $variable, mixed $value = null): static
+    public function assign(array|string $variable, mixed $value = null): static
     {
+        if (is_array($variable)) {
+            foreach ($variable as $key => $value) {
+                $this->data[$key] = $value;
+            }
+
+            return $this;
+        }
+
         $this->data[$variable] = $value;
 
         return $this;

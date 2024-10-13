@@ -4,11 +4,15 @@ namespace Framework\View\Html;
 
 use Framework\Dom\Document;
 use Framework\View\Html\Block\Node as BlockNode;
+use Framework\View\Html\Php\Interpolation;
 
 class Separator
 {
+    private Interpolation $interpolation;
+
     public function __construct(private Document &$document, private string $generatedDirectory, private string $layout)
     {
+        $this->interpolation = new Interpolation;
     }
 
     public function process() {
@@ -35,6 +39,9 @@ class Separator
                 mkdir($dir, 0777, true);
             }
             $content = $node->renderContent();
+
+            $content = $this->interpolation->process($content);
+
             if (!is_file($fileFull) || file_get_contents($fileFull) != $content) {
                 file_put_contents($fileFull, $content);
             }
