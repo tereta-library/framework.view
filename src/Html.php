@@ -304,7 +304,7 @@ class Html
      */
     private function renderDocument(Document $document): string
     {
-        return $this->interpolation->process($document->render());
+        return trim($this->interpolation->process($document->render()));
     }
 
     /**
