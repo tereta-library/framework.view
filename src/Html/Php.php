@@ -52,7 +52,7 @@ class Php
             return;
         }
 
-        if (!preg_match_all('/((attribute):([a-z0-9]+):((.+)(; +|$)))/Usi', $bind, $matches)) {
+        if (!preg_match_all('/((attribute):([a-z0-9\-_]+):((.+)(; +|$)))/Usi', $bind, $matches)) {
             return;
         }
 
