@@ -3,6 +3,7 @@
 namespace Framework\View\Php\Template;
 
 use Framework\View\Php\Template\Functions as TemplateFunctions;
+use Framework\Dictionary\Service\Translation;
 
 /**
  * ···························WWW.TERETA.DEV······························
@@ -31,6 +32,11 @@ class Functions
     private static ?TemplateFunctions $instance = null;
 
     /**
+     * @var Translation|null $vocabulary
+     */
+    private static ?Translation $translation = null;
+
+    /**
      * @return $this
      */
     public static function getInstance(): static
@@ -38,6 +44,7 @@ class Functions
         if (self::$instance) {
             return self::$instance;
         }
+
         return self::$instance = new static();
     }
 
@@ -58,6 +65,28 @@ class Functions
     public function capitalUpperCase(string $string): string
     {
         return ucfirst($string);
+    }
+
+    /**
+     * @param string $string
+     * @return string
+     */
+    public function translate(string $string): string
+    {
+        if (!static::$translation) {
+            return $string;
+        }
+
+        return static::$translation->translate($string);
+    }
+
+    /**
+     * @param Translation $translation
+     * @return void
+     */
+    public static function setTranslation(Translation $translation): void
+    {
+        static::$translation = $translation;
     }
 }
 
