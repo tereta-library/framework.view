@@ -32,15 +32,26 @@ abstract class Block
     protected ?string $template = null;
 
     /**
-     * @param string|null $themeDirectory
+     * @var array $themeDirectory
+     */
+    private array $themeDirectory = [];
+
+    /**
+     * @param string|array|null $themeDirectory
      * @param array $data
      * @param string|null $template
      */
     public function __construct(
-        private ?string $themeDirectory = null,
+        null|string|array $themeDirectory,
         private array $data = [],
         string $template = null
     ) {
+        if (is_array($themeDirectory)) {
+            $this->themeDirectory = $themeDirectory;
+        } else {
+            $this->themeDirectory = [$themeDirectory];
+        }
+
         if ($template !== null) {
             $this->template = $template;
         }
@@ -108,11 +119,24 @@ abstract class Block
 
         ob_start();
         extract($this->data);
-        if (!is_file("{$this->themeDirectory}/{$this->template}")) {
-            throw new Exception("The \"{$this->themeDirectory}/{$this->template}\" template file does not exist.");
+        $file = null;
+        foreach ($this->themeDirectory ?? [] as $themeDirectory) {
+            if (is_file("{$themeDirectory}/{$this->template}")) {
+                $file = "{$themeDirectory}/{$this->template}";
+                break;
+            }
         }
 
-        require "{$this->themeDirectory}/{$this->template}";
+        if (!$this->themeDirectory) {
+            $file = $this->template;
+        }
+
+        if (!is_file($file)) {
+            $themeDirectoryImploded = implode('", "', $this->themeDirectory);
+            throw new Exception("The \"{$this->template}\" template file does not exist in the \"$themeDirectoryImploded\" directories.");
+        }
+
+        require $file;
         return ob_get_clean();
     }
 
