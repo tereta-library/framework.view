@@ -66,7 +66,7 @@ class Block
         }
 
         $block = new BlockNode($this->document);
-        $block->setBlock(new $blockClass($this->themeDirectory, $blockData ? json_decode($blockData, true) : []));
+        $block->setBlock(new $blockClass($blockData ? json_decode($blockData, true) : [], $this->themeDirectory));
         $block->import($node->export());
         $node->getParent()->replaceChild($node, $block);
     }

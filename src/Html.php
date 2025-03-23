@@ -294,7 +294,7 @@ class Html
             file_put_contents($fileFull, $content);
         }
 
-        return (string) (new Template($this->generatedDirectory))->assign($this->variables)->setTemplate($file);
+        return (string) new Template($this->variables, $this->generatedDirectory, $file);
     }
 
     /**

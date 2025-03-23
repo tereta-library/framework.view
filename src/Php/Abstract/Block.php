@@ -42,8 +42,8 @@ abstract class Block
      * @param string|null $template
      */
     public function __construct(
-        null|string|array $themeDirectory,
         private array $data = [],
+        null|string|array $themeDirectory,
         string $template = null
     ) {
         if (is_array($themeDirectory)) {
