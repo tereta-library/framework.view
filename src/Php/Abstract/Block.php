@@ -37,13 +37,13 @@ abstract class Block
     private array $themeDirectory = [];
 
     /**
-     * @param string|array|null $themeDirectory
      * @param array $data
+     * @param string|array|null $themeDirectory
      * @param string|null $template
      */
     public function __construct(
         private array $data = [],
-        null|string|array $themeDirectory,
+        null|string|array $themeDirectory = null,
         string $template = null
     ) {
         if (is_array($themeDirectory)) {
@@ -90,7 +90,7 @@ abstract class Block
     }
 
     /**
-     * @param string $variable
+     * @param array|string $variable
      * @param mixed $value
      * @return $this
      */
