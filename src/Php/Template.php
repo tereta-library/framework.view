@@ -24,7 +24,7 @@ use Framework\View\Php\Template\Functions as TemplateFunctions;
  * @author Tereta Alexander <tereta.alexander@gmail.com>
  * @copyright 2020-2024 Tereta Alexander
  */
-class Template extends AbstractBlock{
+class Template extends AbstractBlock {
     protected function construct(): void
     {
         $this->assign('string', TemplateFunctions::getInstance());
